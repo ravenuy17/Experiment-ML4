@@ -10,7 +10,7 @@ offset = 20
 imgSize = 300 
 counter = 0
 
-folder = 'D:\\Experiment-ML4\\HandSigns\\Oo'
+folder = 'D:\\Experiment-ML4\\HandSigns\\M'
 
 while True:
     success, img = cap.read()
@@ -55,9 +55,9 @@ while True:
     
     if key == ord("s"):
         counter += 1
-        cv2.imwrite(f'{folder}/Image_{time.time()}.jpg', imgWhite)
-        print(counter)
-
+        timestamp = time.time()
+        cv2.imwrite(f'{folder}/Image_{counter}_{timestamp}.jpg', imgWhite)
+        print(f'Saved Image_{counter}_{timestamp}')
 # Release the camera and close all windows
 cap.release()
 cv2.destroyAllWindows()
