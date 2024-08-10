@@ -1,43 +1,59 @@
-from keras.models import load_model  # TensorFlow is required for Keras to work
-from PIL import Image, ImageOps  # Install pillow instead of PIL
-import numpy as np
+import cv2 
+from glob import glob 
+import numpy as np 
+import random 
+from sklearn.utils import shuffle 
+import pickle 
+import os 
 
-# Disable scientific notation for clarity
-np.set_printoptions(suppress=True)
+def pickle_img_labels():
+    imgs_label = []
+    images = glob("HandSigns/*/*.jpg")
+    images.sort()
+    for image in images:
+        print(image)
+        label = image[image.find(os.sep)+1: image.rfind(os.sep)]
+        img = cv2.imread(image, 0)
+        imgs_label.append((np.array(img, dtype = np.uint8), int(label)))
+    return imgs_label
 
-# Load the model
-model = load_model("keras_Model.h5", compile=False)
+img_labels = pickle_img_labels()
+img_labels = shuffle(shuffle(shuffle(shuffle(img_labels))))
+imgs, labels  = zip(*img_labels)
+print("Length of images_labels", len(img_labels))
 
-# Load the labels
-class_names = open("labels.txt", "r").readlines()
+train_images = imgs[:int(5/6*len(imgs))]
+print("Length of train_images", len(train_images))
+with open("train_images", "wb") as f: 
+    pickle.dump(train_images, f)
+del train_images
 
-# Create the array of the right shape to feed into the keras model
-# The 'length' or number of images you can put into the array is
-# determined by the first position in the shape tuple, in this case 1
-data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+train_labels = labels[:int(5/6 * len(labels))]
+print("Length of train_labels", len(train_labels))
+with open("train_labels", "wb") as f: 
+    pickle.dump(train_labels, f)
+del train_labels
 
-# Replace this with the path to your image
-image = Image.open("<IMAGE_PATH>").convert("RGB")
+test_images = imgs[int(5/6 * len(imgs)):int(11/12*len(imgs))]
+print("Length of test_images", len(test_images))
+with open("test_images", "wb") as f:
+    pickle.dump(test_images, f)
+del test_images
 
-# resizing the image to be at least 224x224 and then cropping from the center
-size = (224, 224)
-image = ImageOps.fit(image, size, Image.Resampling.LANCZOS)
+test_labels = labels[int(5/6 * len(labels)):int(11/12 * len(labels))]
+print("Length of test_labels", len(test_labels))
+with open("test_labels", "wb") as f:
+    pickle.dump(test_labels, f)
+del test_labels
 
-# turn the image into a numpy array
-image_array = np.asarray(image)
+val_images = imgs[int(5/6 * len(imgs)):int (11/12 * len(imgs))]
+print("Length of val_images", len(val_images))
+with open("val_images", "wb") as f: 
+    pickle.dump(val_images, f)
+del val_images
 
-# Normalize the image
-normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
-
-# Load the image into the array
-data[0] = normalized_image_array
-
-# Predicts the model
-prediction = model.predict(data)
-index = np.argmax(prediction)
-class_name = class_names[index]
-confidence_score = prediction[0][index]
-
-# Print prediction and confidence score
-print("Class:", class_name[2:], end="")
-print("Confidence Score:", confidence_score)
+val_labels = labels[int(5/6 * len(labels)) :int (11/12 * len(labels))]
+print("Length of val_labels", len(val_labels))
+with open("val_labels", "wb") as f: 
+    pickle.dump(val_labels, f)
+del val_labels 
